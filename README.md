@@ -1,9 +1,6 @@
 lacuna-scripts
 ==============
 
-Perl scripts that I've written for keeping my planets going in Lacuna
-Expanse.
-
 This is a random assortment of scripts that I wrote to automate various
 functions in the game Lacuna Expanse.  It has a great, easy-to-use API that
 makes it easy to automate the daily maintenance of your colonies, from
