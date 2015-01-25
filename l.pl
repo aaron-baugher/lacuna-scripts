@@ -3,7 +3,7 @@
 # A set of routines for use in my Perl scripts for Lacuna Expanse.  See the other
 # scripts found with this for examples.
 
-use 5.10.0;
+use 5.010; use strict; use warnings;
 use Data::Printer;
 use FindBin;
 use List::Util            qw(first);
