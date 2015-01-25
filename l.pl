@@ -7,7 +7,8 @@ use 5.10.0;
 use Data::Printer;
 use FindBin;
 use List::Util            qw(first);
-use lib '/home/abaugher/git/Games-Lacuna-Client/lib';  # point to your location
+# If you've downloaded the latest GLC with git, point to its location:
+use lib '/home/abaugher/git/Games-Lacuna-Client/lib';
 use Games::Lacuna::Client ();
 use Games::Lacuna::Client::Types;
 use Getopt::Long          qw(GetOptions);
@@ -15,9 +16,8 @@ use YAML::Any             qw(LoadFile DumpFile Dump);
 use Fcntl qw(:flock);
 $|=1;
 
-my $cfg_file = Games::Lacuna::Client->get_config_file(['login.yml', 'lacuna.yml']);
 my $client = Games::Lacuna::Client->new(
-    cfg_file => $cfg_file,
+    cfg_file => 'lacuna.yml',
     # debug    => 1,
 );
 my $c = load_cache();
