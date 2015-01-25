@@ -26,7 +26,7 @@ sub doit {
     my %types;
     for my $s (@{$bb->view_all_ships({no_paging => 1})->{ships}}) {
         if ( $station and
-             $s->{type} eq 'fighter' and 
+             ($s->{type} eq 'fighter' or $s->{type} eq 'sweeper') and 
              $s->{task} = 'Defend' and
              ( $s->{orbiting} and $s->{orbiting}{name} eq $station)) {
             $bill++;

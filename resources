@@ -1,0 +1,158 @@
+#!/usr/bin/env perl
+use 5.010; use strict; use warnings;
+$|=1;
+
+require 'l.pl';
+my $hours = $ARGV[0] || 4;
+my %s;
+
+sub doit {
+    my $client = shift;
+    my $planet = shift;
+    my $pid = shift;
+
+    my $pname = $planet->{body}{name};
+
+    printf "%-10s ", $pname;
+
+    $s{$pname} = $planet;
+	
+    for my $r (qw[ food ore water energy waste ]) {
+        my $stored   = $planet->{body}{$r.'_stored'};
+        my $capacity = $planet->{body}{$r.'_capacity'};
+        my $usage    = $planet->{body}{$r.'_hour'};
+        my $space = $capacity - $stored;
+        my $timeleft = 0;
+        $usage = 1 unless $usage;
+        if ( $usage < 0 ) {                           # negative gain
+            $timeleft = $stored / $usage;             # in hours
+        } else {
+            $timeleft = $space / $usage;
+        }
+        my $tl = int($timeleft*3600*100)/100;
+        if ( abs($tl) < $hours*3600 ) {
+            printf "%12s ", secs2clock($tl);
+        } else {
+            printf "%12s ", '';
+        }
+    }
+    say '';
+}
+
+printf "%-10s %12s %12s %12s %12s %12s\n", 
+    qw"Times Food Ore Water Energy Waste";
+say "=" x 75;
+
+for_each_planet(\&doit);
+
+say "=" x 75;
+printf "%-10s %12s %12s %12s %12s %12s\n", 
+    qw"Space Food Ore Water Energy Waste";
+say "=" x 75;
+for my $pname (sort keys %s) {
+    printf "%-10s ", $pname;
+    my $planet = $s{$pname};
+    for my $r (qw[ food ore water energy waste ]) {
+        my $stored   = $planet->{body}{$r.'_stored'};
+        my $capacity = $planet->{body}{$r.'_capacity'};
+        my $space = $capacity - $stored;
+        printf "%12s ", num($space);
+    }
+    say '';
+}
+
+say "=" x 75;
+printf "%-10s %12s %12s %12s %12s %12s\n", 
+    qw"Stored Food Ore Water Energy Waste";
+say "=" x 75;
+my %stotals;
+for my $pname (sort keys %s) {
+    printf "%-10s ", $pname;
+    my $planet = $s{$pname};
+    for my $r (qw[ food ore water energy waste ]) {
+        my $stored   = $planet->{body}{$r.'_stored'};
+        $stotals{$r} += $stored;
+        printf "%12s ", num($stored);
+    }
+    say '';
+}
+say "=" x 75;
+printf "%-10s %12s %12s %12s %12s %12s\n", 
+    'Total', num(@stotals{qw( food ore water energy waste )});
+
+say "=" x 75;
+printf "%-10s %12s %12s %12s %12s %12s\n", 
+    qw"Produce Food Ore Water Energy Waste";
+say "=" x 75;
+my %totals;
+for my $pname (sort keys %s) {
+    printf "%-10s ", $pname;
+    my $planet = $s{$pname};
+    for my $r (qw[ food ore water energy waste ]) {
+        my $usage    = $planet->{body}{$r.'_hour'};
+        printf "%12s ", num($usage);
+        $totals{$r} += $usage;
+    }
+    say '';
+}
+
+my $planets = keys %s;
+
+say "=" x 75;
+printf "%-10s %12s %12s %12s %12s %12s\n", 
+    'Total', num(@totals{qw( food ore water energy waste )});
+printf "%-10s %12s %12s %12s %12s %12s\n", 
+    'Average', num(
+        $totals{food}/$planets,
+        $totals{ore}/$planets,
+        $totals{water}/$planets,
+        $totals{energy}/$planets,
+        $totals{waste}/$planets,
+    );
+
+=head1 Name
+
+resources - report resource levels and production
+
+=head1 Usage
+
+./resources <hours>
+
+=head1 Description
+
+This script provides a breakdown of resources per-planet, in a variety of ways.
+
+=over
+
+=item 1. Amount of time remaining until that resource is full (or empty, if
+    shown as a negative number.
+
+=item 2. Space remaining for each resource.
+
+=item 3. Amount stored of each resource.
+
+=item 4. Hourly production of each resource. Followed by an overall total, then
+    an average per planet.
+
+=back
+
+For the first report (Times), only times less than a set number of hours are
+displayed, to make it easier to spot low ones.  The hour limit can be passed
+on the command line, and defaults to 4 hours otherwise.
+
+All totals are shown in K (thousands).
+
+=head1 Requirements
+
+Uses custom routines in l.pl, which should be found where this script was.
+
+=head1 See Also
+
+https://github.com/aaron-baugher/lacuna-scripts
+
+=head1 Author
+
+Aaron Baugher - aaron.baugher.biz
+
+=cut
+
