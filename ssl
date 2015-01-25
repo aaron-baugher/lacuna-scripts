@@ -1,0 +1,55 @@
+#!/usr/bin/env perl
+use 5.010; use strict; use warnings;
+use List::Util qw(first);
+$|=1;
+
+require 'l.pl';
+
+sub doit {
+    my $client = shift;
+    my $planets = shift;
+    my $pid = shift;
+    my $buildings = shift;
+    my $bid = shift;
+
+    printf "%-12s", $planets->{$pid};
+    my $bb = $client->building( id => $bid, type => 'SSLa' );
+
+    my $mp = $bb->view();       # ->{make_plan};
+    printf "%12s   %-40s", 
+        secs2clock($mp->{building}{work}{seconds_remaining}),
+        $mp->{make_plan}{making}
+        if $mp->{make_plan}{making};
+    say '';
+}
+
+for_each_planet_one_building(\&doit,
+building_type('SSLa'),{always_rescan=>0});
+
+=head1 Name
+
+ssl - See what your Space Station Labs are building
+
+=head1 Usage
+
+./ssl
+
+=head1 Description
+
+Reports what each of your Space Station Labs is building, and how long it has
+until finished.
+
+=head1 Requirements
+
+Uses custom routines in l.pl, which should be found where this script was.
+
+=head1 See Also
+
+https://github.com/aaron-baugher/lacuna-scripts
+
+=head1 Author
+
+Aaron Baugher - aaron.baugher.biz
+
+=cut
+

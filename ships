@@ -1,0 +1,115 @@
+#!/usr/bin/env perl
+use 5.010; use strict; use warnings;
+$|=1;
+
+my $station = 'Billingate';  # Enter the name of your space station or leave empty
+
+my %shiptypes = (
+    E => 'Excavator', F => 'Freighter', FF => 'Fighter',
+    H => 'Hulk', HF => 'Hulk Fast', HH => 'Hulk Huge',
+    C => 'Cargo Ship', G => 'Galleon', 
+    S => 'Smuggler Ship' );
+
+require 'l.pl';
+my $bill = 0;
+
+sub doit {
+    my $client = shift;
+    my $planets = shift;
+    my $pid = shift;
+    my $buildings = shift;
+    my $bid = shift;
+    
+    my $bb = $client->building( id => $bid, type => 'SpacePort' );
+    say "=== $planets->{$pid} ===";
+    my %ships; 
+    my %types;
+    for my $s (@{$bb->view_all_ships({no_paging => 1})->{ships}}) {
+        if ( $station and
+             $s->{type} eq 'fighter' and 
+             $s->{task} = 'Defend' and
+             ( $s->{orbiting} and $s->{orbiting}{name} eq $station)) {
+            $bill++;
+        }
+        my $n = sprintf "%-26s %2d %8d %16s %3s", 
+            $s->{type_human},
+            $s->{berth_level},
+            $s->{speed},
+            num($s->{hold_size}),
+            shorten_task($s->{task});
+        $ships{$n}++;
+        $types{$s->{type_human}}++ if $s->{task} =~ /Docked|Travelling/;
+    }
+
+    for my $s (sort alpha keys %ships) {
+        printf "   %3d %s\n", $ships{$s}, $s;
+    }
+    for my $t (sort alpha keys %shiptypes) {
+        print "$t:$types{$shiptypes{$t}} " if $types{$shiptypes{$t}};
+    }
+    say '    Open docks: ', $bb->view()->{docks_available};
+}
+
+for_each_planet_one_building(\&doit, 'Space Port');
+say "$bill orbiting $station" if $station;
+
+sub shorten_task {
+    my $t = shift;
+    my %t = (Docked         => ' ',
+             Defend         => 'D',
+             Mining         => 'M',
+             Travelling     => 'T',
+             'Waste Chain'  => 'W',
+             'Supply Chain' => 'S',
+         );
+    if ( defined $t{$t} ) {
+        return $t{$t};
+    } else {
+        return $t;
+    }
+}
+
+=head1 Name
+
+ships - Return a list of ships on each planet
+
+=head1 Usage
+
+./ships
+
+=head1 Description
+
+This script provides a list of ships at each planet, broken down by type,
+speed, hold size, and current task.  Common tasks are shortened to a single
+letter to keep the display within an 80-column terminal (see abbreviations
+below).
+
+After listing a planet's ships, it provides a one-line summary of certain
+useful types (defined in %shiptypes), and how many open docks that planet has.
+
+If you have a Space Station defined, it will also tell you how many fighters
+are orbiting it in defense, sent there by other planets.
+
+=head2 Task Abbreviations
+
+[space] Docked
+    D   Defend
+    M   Mining
+    T   Travelling
+    W   Waste Chain
+    S   Supply Chain
+
+=head1 Requirements
+
+Uses custom routines in l.pl, which should be found where this script was.
+
+=head1 See Also
+
+https://github.com/aaron-baugher/lacuna-scripts
+
+=head1 Author
+
+Aaron Baugher - aaron.baugher.biz
+
+=cut
+
