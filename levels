@@ -45,18 +45,32 @@ sub doit {
 
 for_each_planet_get_buildings(\&doit);
 
-sub usage {
-    die <<"END_USAGE";
-Usage: $0 
 
-Tells you the next level for each of the buildings listed in @t.  Useful
-for matching upgrade plans to planets that need them, and finding things
-needing upgrades.
+=head1 Name
 
-Requirements:
-Custom routines in l.pl
+levels - Show levels of certain buildings on each planet
 
-END_USAGE
+=head1 Usage
 
-}
+./levels
+
+=head1 Description
+
+This script contains a list of interesting buildings in @t.  Edit that list
+to include the buildings you want to scan.  It will tell you the I<next> level
+for each building on the list, so you can look for upgrade plans for that level.
+
+=head1 Requirements
+
+Uses custom routines in l.pl, which should be found where this script was.
+
+=head1 See Also
+
+https://github.com/aaron-baugher/lacuna-scripts
+
+=head1 Author
+
+Aaron Baugher - aaron.baugher.biz
+
+=cut
 
