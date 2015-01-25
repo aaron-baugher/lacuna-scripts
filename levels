@@ -1,0 +1,62 @@
+#!/usr/bin/env perl
+use 5.10.0;
+$|=1;
+
+require 'l.pl';   # Pull in custom routines
+
+my %l;
+my @t = (         # Buildings I want level info on
+    'Algae Pond',
+    'Beeldeban Nest',
+    'Denton Brambles',
+    'Entertainment District',
+    'Geo Thermal Vent',
+    'Interdimensional Rift',
+    'Malcud Field',
+    'Natural Spring',
+    'Ravine',
+    'Volcano',
+    'Citadel of Knope',
+    "Gratch's Gauntlet",
+    'Oracle of Anid',
+);
+
+sub doit {
+    my $client = shift;
+    my $planet = shift;
+    my $pid = shift;
+
+    my $pname = $planet->{status}{body}{name};
+    my $total = 0;
+
+    say "=== $pname ===";
+	
+    for my $t (@t) {
+        for my $k (keys %{$planet->{buildings}}) {
+            if ( $planet->{buildings}{$k}{name} eq $t ) {
+                printf "%2d %-s\n", $planet->{buildings}{$k}{level}+1, 
+                    $t;
+                $total += $planet->{buildings}{$k}{level}+1;
+            }
+        }
+    }
+    printf "%2d TOTAL\n\n", $total;
+}
+
+for_each_planet_get_buildings(\&doit);
+
+sub usage {
+    die <<"END_USAGE";
+Usage: $0 
+
+Tells you the next level for each of the buildings listed in @t.  Useful
+for matching upgrade plans to planets that need them, and finding things
+needing upgrades.
+
+Requirements:
+Custom routines in l.pl
+
+END_USAGE
+
+}
+
