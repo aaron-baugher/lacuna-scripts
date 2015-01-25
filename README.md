@@ -26,6 +26,15 @@ server end.  You can play competitively, where attacks between players are
 possible, or stay out of the fighting with an independent planet -- and
 change later if you wish.
 
+Before using these scripts, you will need to create a config file with your
+player information.  Call it "lacuna.yml", place it in the same directory as
+the scripts, and put these four lines with your info:
+
+empire_name: <your empire name>
+empire_password: <your empire password>
+server_uri: https://us1.lacunaexpanse.com/
+api_key: <get this from https://us1.lacunaexpanse.com/api/ApiKeys.html>
+
 
 
 
