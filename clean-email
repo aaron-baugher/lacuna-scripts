@@ -1,0 +1,67 @@
+#!/usr/bin/env perl
+use 5.10.0;
+$|=1;
+
+require 'l.pl';
+my $client = get_client();
+my $inbox = $client->inbox;
+my $n = $inbox->view_inbox()->{message_count};
+die "No messages\n" unless $n;
+my $page = int(($n+1)/25)+1;
+my @totrash;
+my $subjects;
+
+while ($page) {
+    say "Checking page $page";
+    my $messages = $inbox->view_inbox({page_number => $page });
+    for my $m (@{$messages->{messages}}) {
+        if(
+            # put your regex or other matches here
+            $m->{subject} eq 'Target Neutralized' or 
+            $m->{subject} eq 'Fissure growing nearby' or 
+            $m->{subject} eq 'Glyph Discovered!'
+        ){
+            push @totrash, $m->{id};
+        } else {
+            $subjects .= "$m->{subject}\n";
+        }
+    }
+    $page--;
+}
+if (@totrash) {
+    my $r = $inbox->trash_messages([@totrash]);
+    say "Trashed ".scalar @totrash." messages out of $n.";;
+} else {
+    say 'Nothing to trash';
+}
+say $subjects if $subjects;
+
+=head1 Name
+
+clean-email - Clean repetitive messages from Lacuna mailbox
+
+=head1 Usage
+
+./clean-email
+
+=head1 Description
+
+This script checks the Lacuna in-game inbox and deletes all messages matching
+one of a set of patterns.  It also reports the number of messages trashed and
+lists the subjects of any remaining messages.
+
+=head1 Requirements
+
+Uses custom routines in l.pl, which should be found where this script was.
+
+=head1 See Also
+
+https://github.com/aaron-baugher/lacuna-scripts
+
+=head1 Author
+
+Aaron Baugher - aaron.baugher.biz
+
+=cut
+
+
