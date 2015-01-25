@@ -1,0 +1,75 @@
+#!/usr/bin/env perl
+use 5.10.0;
+use List::Util qw(first max min);
+$|=1;
+
+require 'l.pl';
+
+sub doit {
+    my $client = shift;
+    my $planets = shift;
+    my $pid = shift;
+    my $buildings = shift;
+    my $bid = shift;
+
+    my $b = $client->building( id => $bid, type => 'Development' );
+    my $v = $b->view( id => $bid );
+
+    my $long  = secs2clock( max map { $_->{seconds_remaining} }
+                                @{$v->{build_queue}} );
+    my $short = secs2clock( min map { $_->{seconds_remaining} }
+                                @{$v->{build_queue}} );
+    my $builds = @{$v->{build_queue}};
+    my $max = $v->{building}{level} + 1;
+    printf "%-9s %2d %2d %12s %12s\n", $planets->{$pid}, 
+        $builds, $max - $builds, $short, $long;
+    if ( $v->{status}{body}{num_incoming_enemy} ) {
+        say "$v->{status}{body}{num_incoming_enemy} enemy ships incoming to $planets->{$pid}";
+    }
+}
+
+for_each_planet_one_building(\&doit, 'Development Ministry',
+                              {always_rescan=>0});
+
+=head1 Name
+
+builds - Show build queue status and incoming enemy ships for each planet.
+
+=head1 Usage
+
+./builds
+
+=head1 Description
+
+This script lists the build queue status for each planet.  For each planet it shows, in order:
+
+=over
+
+=item name
+
+=item items in queue
+
+=item empty queue spots remaining
+
+=item time needed for total queue to finish
+
+=item time needed for current build to finish
+
+=back
+
+It also shows the number of incoming enemy ships for each planet, if any.
+
+=head1 Requirements
+
+Uses custom routines in l.pl, which should be found where this script was.
+
+=head1 See Also
+
+https://github.com/aaron-baugher/lacuna-scripts
+
+=head1 Author
+
+Aaron Baugher - aaron.baugher.biz
+
+=cut
+

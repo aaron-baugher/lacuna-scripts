@@ -1,0 +1,101 @@
+#!/usr/bin/env perl
+use 5.10.0;
+use List::Util qw(first);
+$|=1;
+
+require 'l.pl';
+my $repeat;
+if ( $ARGV[0] eq '-r' ) {
+    $repeat = 1;
+    shift @ARGV;
+}
+my $max = $ARGV[2] || 30;
+
+sub doit {
+    my $client = shift;
+    my $planets = shift;
+    my $pid = shift;
+    my $buildings = shift;
+    my $bid = shift;
+
+    my $bname = bname($ARGV[1])->{name};
+    my $btype = bname($ARGV[1])->{type};
+
+    say "=== $planets->{$pid} ===";
+    $bid = first {
+        $buildings->{$_}->{name} eq $bname and 
+            ! $buildings->{$_}{pending_build} 
+        } sort { $buildings->{$a}{level} <=> $buildings->{$b}{level} } 
+	keys %$buildings;
+    $bid = $ARGV[3] if $ARGV[3]; # specific building ID
+    $ARGV[3] = '' unless $ARGV[3];
+
+    my $bb = $client->building( id => $bid, type => $btype );
+	
+    my $r;
+    eval {
+        $r = $bb->upgrade();
+    };
+    unless($r){
+        say "Unable to upgrade $bname on $ARGV[0]: $@";
+        return;
+    }
+    say "Upgraded $bname on $ARGV[0] to level @{[$r->{building}{level}+1]}";
+    if ( $repeat and $r->{building}{pending_build} and
+             $max > $r->{building}{level} + 1
+         ) {
+        my $mins = int($r->{building}{pending_build}{seconds_remaining}/60) + 1;
+        open my $out, "| at now + $mins minutes >>log/upgrade 2>&1" or die $!;
+        print $out "./upgrade -r $ARGV[0] $btype $max $ARGV[3] >>log/upgrade\n";
+        close $out;
+    }
+}
+
+one_planet_one_building(\&doit, $ARGV[0], bname($ARGV[1])->{name},
+                        {always_rescan => 1});
+
+=head1 Name
+
+upgrade - Upgrade a building
+
+=head1 Usage
+
+# To upgrade a spaceport once on PlanetA:
+
+./upgrade PlanetA spacepor 
+
+# To upgrade repeatedly until reaching a certain level:
+
+./upgrade -r PlanetA spacepo <level>
+
+=head1 Description
+
+This script upgrades a building, given the planet name and a substring
+matching the building type.  The building substring will match the first
+building type starting with that substring, case insensitive.
+
+The B<-r> option creates an B<at> task to repeat the upgrade after this
+upgrade is done, and keep repeating until the building reaches the target
+level.
+
+If no target level is given, it will upgrade the building to its maximum level
+(30 for most buildings) or until an upgrade fails for lack of resources or
+build queue space.
+
+=head1 Requirements
+
+Uses custom routines in l.pl, which should be found where this script was.
+
+The Unix 'at' utility is used to set up repeat upgrades.  If you do not have
+'at' on your system, you can still use this script without the B<-r> option.
+
+=head1 See Also
+
+https://github.com/aaron-baugher/lacuna-scripts
+
+=head1 Author
+
+Aaron Baugher - aaron.baugher.biz
+
+=cut
+
