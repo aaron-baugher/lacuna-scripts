@@ -3,12 +3,11 @@
 # A set of routines for use in my Perl scripts for Lacuna Expanse.  See the other
 # scripts found with this for examples.
 
-use Modern::Perl;
+use 5.10.0;
 use Data::Printer;
 use FindBin;
 use List::Util            qw(first);
-use lib '/home/abaugher/git/Games-Lacuna-Client/lib';
-use lib "$FindBin::Bin/../lib";
+use lib '/home/abaugher/git/Games-Lacuna-Client/lib';  # point to your location
 use Games::Lacuna::Client ();
 use Games::Lacuna::Client::Types;
 use Getopt::Long          qw(GetOptions);

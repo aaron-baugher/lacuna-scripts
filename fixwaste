@@ -1,0 +1,94 @@
+#!/usr/bin/env perl
+use 5.10.0;
+$|=1;
+
+require 'l.pl';
+my $stored; my $rate; my $capacity;
+my $target_arg = $ARGV[0] || '10%';   # default target waste amount
+my %special = (
+    'Hergrom' => '90%',
+    'Turris'  => '90%',
+);
+
+sub chains {
+    my $client = shift;
+    my $planets = shift;
+    my $pid = shift;
+    my $buildings = shift;
+    my $bid = shift;
+
+    my $planet = $client->body( id => $pid )->get_status;
+    $stored   = $planet->{body}{waste_stored};
+    $rate     = $planet->{body}{waste_hour};
+    $capacity = $planet->{body}{waste_capacity};
+    my $pname = $planets->{$pid};
+	
+    my $bb = $client->building( id => $bid, type => 'Trade' );
+    my $v = $bb->view_waste_chains( id => $bid )->{waste_chain};
+
+    my $chainrate = $v->[0]{waste_hour};
+    $chainrate *= $v->[0]{percent_transferred} / 100 if
+        $v->[0]{percent_transferred} < 100;
+    my $baserate = $chainrate + $rate;
+    my $target  = $target_arg;
+    $target = $special{$pname} if $special{$pname};
+
+    if( $target =~ /(\d+)%/ ){
+        $target = int($capacity * $1 / 100);
+    }
+    my $newrate = int(($target - $stored)/4);
+    my $newchain = $baserate - $newrate;
+    $newchain = 1 if $newchain < 1;
+
+    say "=== $pname ===";
+    printf "%13s %13s %13s %13s\n%13s %13s %13s %13s\n%13s %13s %13s %13s\n".
+        "%13s %13s %13s %13s\n",
+        ' Capacity:   ', num($capacity), 
+        ' Stored:     ', num($stored), 
+        ' Target:     ', num($target), 
+        ' Rate:       ', num($rate),
+        ' Chain rate: ', num($chainrate), 
+        ' Base Rate:  ', num($baserate), 
+        ' New Rate:   ', num($newrate),
+        ' New Chain:  ', num($newchain),
+        ; 
+    my $r = $bb->update_waste_chain($v->[0]{id}, $newchain);
+    sleep 5;
+}
+
+for_each_planet_one_building(\&chains, 'Trade Ministry');
+
+=head1 Name
+
+fixwaste - Set waste chains on each planet to maintain desired waste levels
+
+=head1 Usage
+
+./fixwaste <target_value>
+
+=head1 Description
+
+This script adjusts each planet's waste chain to keep waste from getting too
+low or high.  You can set a default percentage, and also a list of planets
+with their own custom percentages.  That way you can keep it low for most
+planets, but high for planets which need waste to run a Black Hole Generator,
+for instance.
+
+If no target value is given, it defaults to 10%.  Target value can be given as
+a percentage or an absolute value.  The %special hash allows you to set
+special values for certain planets.
+
+=head1 Requirements
+
+Uses custom routines in l.pl, which should be found where this script was.
+
+=head1 See Also
+
+https://github.com/aaron-baugher/lacuna-scripts
+
+=head1 Author
+
+Aaron Baugher - aaron.baugher.biz
+
+=cut
+
