@@ -1,0 +1,91 @@
+#!/usr/bin/env perl
+use 5.10.0;
+use List::Util qw(first);
+$|=1;
+
+require 'l.pl';
+
+sub doit {
+    my $client = shift;
+    my $planets = shift;
+    my $pid = shift;
+    my $buildings = shift;
+    my $bid = shift;
+    
+    my $b = $client->building( id => $bid, type => 'ThemePark' );
+    my $v = $b->view( id => $bid );
+    say "=== $planets->{$pid} ===";
+
+    my $count = 0;
+    while ( my $can = $v->{themepark}{can_operate}) {
+        $b->operate();
+        say "Adding one more hour to theme park.";
+        $v = $b->view( id => $bid );
+        sleep 2;
+        last if $count++ > 48;
+    }
+
+    say "Running with $v->{themepark}{food_type_count} foods 
+	until $v->{building}{work}{end}.";
+    # say $v->{themepark}{reason}[1];
+    $bid = first {
+        $buildings->{$_}->{name} eq 'Theme Park' and $_ != $bid
+    } keys %$buildings;
+
+    return unless $bid;
+    $b = $client->building( id => $bid, type => 'ThemePark' );
+    $v = $b->view( id => $bid );
+
+    $count = 0;
+    while ( my $can = $v->{themepark}{can_operate}) {
+        $b->operate();
+        say "Adding one more hour to theme park.";
+        $v = $b->view( id => $bid );
+        sleep 2;
+        last if $count++ > 48;
+    }
+
+    say "Running with $v->{themepark}{food_type_count} foods 
+	until $v->{building}{work}{end}.";
+}
+
+for_each_planet_one_building(\&doit, 'Theme Park');
+
+=head1 Name
+
+theme - Keep theme parks running at top efficiency
+
+=head1 Usage
+
+./theme
+
+=head1 Description
+
+This script finds all theme parks, and adds up to 48 hours of operation to
+each one at current operating level, or until it runs out of enough food
+types, whichever comes first.  I run it as a daily cron task, which gradually
+extends the time as long as I keep the planets supplied with enough different
+foods.
+
+=head1 Requirements
+
+Uses custom routines in l.pl, which should be found where this script was.
+
+=head1 See Also
+
+https://github.com/aaron-baugher/lacuna-scripts
+
+=head1 Programming Note
+
+This script does some of the building-finding work that I normally keep in the
+library file l.pl, because it needed to start handling multiple theme parks
+after I built a second one on one planet.  I really should add a
+multiple-building routine to the library file, but I haven't had much of a
+need for it elsewhere yet.
+
+=head1 Author
+
+Aaron Baugher - aaron.baugher.biz
+
+=cut
+

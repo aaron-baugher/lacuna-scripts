@@ -35,6 +35,9 @@ empire_password: <your empire password>
 server_uri: https://us1.lacunaexpanse.com/
 api_key: <get this from https://us1.lacunaexpanse.com/api/ApiKeys.html>
 
-
+Since these scripts use API/RPC calls just as the web client does, it counts
+against your per-minute and per-day RPC limits.  If you start getting a lot of
+"Slow down!" messages from your scripts or the web client, you may need to run
+the scripts less often or put "sleep" commands in them to slow them down.
 
 

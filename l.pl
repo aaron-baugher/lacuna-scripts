@@ -107,7 +107,8 @@ sub one_planet_one_building {
     # Find the right building
     my $bid = first {
         $buildings->{$_}->{name} eq $building_name
-    } sort { $buildings->{$a}{level} <=> $buildings->{$b}{level} } keys %$buildings;
+    } sort { $options->{highfirst} ? $buildings->{$b}{level} <=> $buildings->{$a}{level} :
+                                     $buildings->{$a}{level} <=> $buildings->{$b}{level} } keys %$buildings;
     if (! $bid and $options->{always_rescan} ) {
         # Load planet data
         my $body      = $client->body( id => $pid );

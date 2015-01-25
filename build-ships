@@ -1,0 +1,73 @@
+#!/usr/bin/env perl
+use 5.10.0;
+use List::Util qw(first);
+$|=1;
+
+require 'l.pl';
+
+die "Usage: build-ships Source type number" unless $ARGV[2];
+my $source = $ARGV[0];
+my $atype  = $ARGV[1];
+my $number = $ARGV[2];
+
+sub doit {
+    my $client = shift;
+    my $planets = shift;
+    my $pid = shift;
+    my $buildings = shift;
+    my $bid = shift;
+    
+    my $bb = $client->building( id => $bid, type => 'Shipyard' );
+
+    my $buildable = $bb->get_buildable()->{buildable};
+    my $type = first { /$atype/i } grep { $buildable->{$_}{can} } keys %{$buildable};
+    die "No matching ship type found: $atype\n" unless $type;
+    my $r = $bb->build_ship($type, $number);
+    say $r->{number_of_ships_building}." $type ships in progress";
+}
+
+# option highfirst uses highest-level shipyard on the planet
+one_planet_one_building(\&doit, $source, 'Shipyard', {highfirst => 1});
+
+=head1 Name
+
+build-ships - Build a number of a type of ships
+
+=head1 Usage
+
+./build-ships planet type number
+
+To build 30 excavators on PlanetA:
+
+./build-ships PlanetA exc 30
+
+=head1 Description
+
+This script builds ships.  The ship type can be given as a substring which
+will match any part of the ship type, case-insensitive.  Be careful with this;
+you may not match the type you expected. (See BUGS section below.)
+
+It always builds at the highest-level Shipyard on the planet, since it will
+build the fastest.
+
+=head1 Requirements
+
+Uses custom routines in l.pl, which should be found where this script was.
+
+=head1 Bugs
+
+It may not be possible to match some ship types.  For instance, attempting to
+build "colony" may match the Short Range Colony Ship first, which makes it
+impossible to match the regular Colony Ship.  Fortunately, this isn't a type
+that needs to be built very often.
+
+=head1 See Also
+
+https://github.com/aaron-baugher/lacuna-scripts
+
+=head1 Author
+
+Aaron Baugher - aaron.baugher.biz
+
+=cut
+
