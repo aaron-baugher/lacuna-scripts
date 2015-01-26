@@ -30,10 +30,12 @@ Before using these scripts, you will need to create a config file with your
 player information.  Call it "lacuna.yml", place it in the same directory as
 the scripts, and put these four lines with your info:
 
+<pre>
 empire_name: <your empire name>
 empire_password: <your empire password>
 server_uri: https://us1.lacunaexpanse.com/
 api_key: <get this from https://us1.lacunaexpanse.com/api/ApiKeys.html>
+</pre>
 
 Since these scripts use API/RPC calls just as the web client does, it counts
 against your per-minute and per-day RPC limits.  If you start getting a lot of
