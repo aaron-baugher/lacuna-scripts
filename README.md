@@ -11,8 +11,8 @@ JSON-RPC backend and turns the server response into a single hash structure.
 I started writing these scripts as practice in functional programming.  Each
 script has a function which it then passes to a library function that
 loops through all the planets/buildings and applies the first function to
-each.  The idea was to keep the individual functions very simple by putting
-as much of the API work and looping in the required function as possible.
+each.  The idea was to keep the individual processing functions very simple
+by putting as much of the API work and looping in the library as possible.
 
 These scripts evolved somewhat as my planets developed, so some of them were
 useful for low-level planets (the 'trade' script that gathers all glyphs to
