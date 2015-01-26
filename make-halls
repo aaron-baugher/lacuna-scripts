@@ -1,0 +1,75 @@
+#!/usr/bin/env perl
+use 5.010; use strict; use warnings;
+$|=1;
+
+require 'l.pl';
+
+sub doit {
+    my $client = shift;
+    my $planets = shift;
+    my $pid = shift;
+    my $buildings = shift;
+    my $bid = shift;
+    
+    my $bb = $client->building( id => $bid, type => 'Archaeology' );
+    my %glyphs = map { $_->{type} => $_->{quantity} }
+        @{$bb->get_glyph_summary->{glyphs}};
+
+    my @recipes = (
+        [qw/ goethite  halite      gypsum        trona     /],
+        [qw/ gold      anthracite  uraninite     bauxite   /],
+        [qw/ kerogen   methane     sulfur        zircon    /],
+        [qw/ monazite  fluorite    beryl         magnetite /],
+        [qw/ rutile    chromite    chalcopyrite  galena    /],
+    );
+    my $total = 0;
+    for my $set (@recipes) {
+        my @sorted = sort { ($glyphs{$a}||0) <=> ($glyphs{$b}||0) } @$set;
+        my $least = $glyphs{ shift @sorted } || 0;
+        #   $least--;     # uncomment to save one of each for other builds
+        if ( $least > 0 ) {
+            $least = 5000 if $least > 5000;
+            my $r = $bb->assemble_glyphs($set, $least);
+            say "Created $least Halls from ", join ' / ', @$set;
+            $total += $least;
+        } else {
+            say "Not enough glyphs of ", join ' / ', @$set;
+        }
+    }
+    say "*** Created $total total Halls at $planets->{$pid}.\n-----";
+    sleep 1;
+}
+
+for_each_planet_one_building(\&doit, 'Archaeology Ministry');
+
+=head1 Name
+
+make-halls - Make Halls of Vrbansk
+
+=head1 Usage
+
+./make-halls
+
+=head1 Description
+
+Makes as many Halls of Vrbansk as possible with the glyphs available on each planet.
+
+=head1 Requirements
+
+Uses custom routines in l.pl, which should be found where this script was.
+
+=head1 Bugs
+
+With many planets, this script can exceed the 60 RPC calls/minute limit.
+Adjust the sleep value near the end of the loop as necessary.
+
+=head1 See Also
+
+https://github.com/aaron-baugher/lacuna-scripts
+
+=head1 Author
+
+Aaron Baugher - aaron.baugher.biz
+
+=cut
+
