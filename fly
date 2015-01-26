@@ -1,0 +1,70 @@
+#!/usr/bin/env perl
+use 5.010; use strict; use warnings;
+$|=1;
+
+require 'l.pl';
+die "Usage: fly Source Destination type <number>" unless $ARGV[2];
+my $source = $ARGV[0];
+my $destname = $ARGV[1];
+my $type = $ARGV[2];
+my $number = $ARGV[3];
+
+sub doit {
+    my $client = shift;
+    my $planets = shift;
+    my $pid = shift;
+    my $buildings = shift;
+    my $bid = shift;
+    
+    my $bb = $client->building( id => $bid, type => 'SpacePort' );
+    my $ships = $bb->view_all_ships({no_paging=>1})->{ships};
+
+    for my $ship ( grep { $_->{type} =~ /$type/i and 
+                              $_->{task} eq 'Docked' } @$ships ) {
+        say "Sending $ship->{name} to $destname";
+        $bb->send_ship( $ship->{id}, { body_name => $destname } );
+        if ( $number ){
+            $number--;
+            exit unless $number;
+        }
+    }
+}
+
+one_planet_one_building(\&doit, $source, 'Space Port');
+
+=head1 Name
+
+fly - Deploy ships from one planet to a target
+
+=head1 Usage
+
+./fly Source Destination Type <number>
+
+=head1 Description
+
+Deploy a number of ships of a particular type from one planet to another.
+Useful for deploying large numbers of Fighters or Sweepers to orbit a planet
+or station, or for sending Fissure Sealers to a target.
+
+If no number is given on the command line, it will send all ships of that type
+that are available.
+
+=head1 Requirements
+
+Uses custom routines in l.pl, which should be found where this script was.
+
+=head1 Bugs
+
+Some ship-sending functions now require a captcha, so this script will fail
+for those.
+
+=head1 See Also
+
+https://github.com/aaron-baugher/lacuna-scripts
+
+=head1 Author
+
+Aaron Baugher - aaron.baugher.biz
+
+=cut
+
