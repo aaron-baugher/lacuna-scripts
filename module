@@ -1,0 +1,57 @@
+#!/usr/bin/env perl
+use 5.010; use strict; use warnings;
+$|=1;
+require 'l.pl';
+
+sub doit {
+    my $client = shift;
+    my $planets = shift;
+    my $pid = shift;
+    my $buildings = shift;
+    my $bid = shift;
+
+    say "=== $planets->{$pid} ===";
+
+    my $bb = $client->building( id => $bid, type => 'SSLa' );
+    my $r =	$bb->make_plan($ARGV[1], $ARGV[2]);
+    say "Built $ARGV[1] $ARGV[2]+0 plan on $ARGV[0]";
+}
+
+one_planet_one_building(\&doit, $ARGV[0], bname('SSLA')->{name},
+                        {always_rescan => 1});
+
+=head1 Name
+
+module - Build a space station module
+
+=head1 Usage
+
+./module Planet module level
+
+=head1 Description
+
+Builds a module of the specified level.  The module types to use are on the left:
+
+  command       => Station Command
+  ibs           => IBS
+  art           => Art Museum
+  opera         => Opera House
+  food          => Culinary Institute
+  parliament    => Parliament
+  warehouse     => Warehouse
+  policestation => Police Station
+
+=head1 Requirements
+
+Uses custom routines in l.pl, which should be found where this script was.
+
+=head1 See Also
+
+https://github.com/aaron-baugher/lacuna-scripts
+
+=head1 Author
+
+Aaron Baugher - aaron.baugher.biz
+
+=cut
+
