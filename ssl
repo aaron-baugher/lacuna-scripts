@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 use 5.010; use strict; use warnings;
-use List::Util qw(first);
+    use Data::Printer;
 $|=1;
 
 require 'l.pl';
@@ -11,11 +11,10 @@ sub doit {
     my $pid = shift;
     my $buildings = shift;
     my $bid = shift;
-
     printf "%-12s", $planets->{$pid};
     my $bb = $client->building( id => $bid, type => 'SSLa' );
 
-    my $mp = $bb->view();       # ->{make_plan};
+    my $mp = $bb->view();
     printf "%12s   %-40s", 
         secs2clock($mp->{building}{work}{seconds_remaining}),
         $mp->{make_plan}{making}
@@ -23,8 +22,7 @@ sub doit {
     say '';
 }
 
-for_each_planet_one_building(\&doit,
-building_type('SSLa'),{always_rescan=>0});
+for_each_planet_one_building(\&doit, bname('SSLA')->{name}, {always_rescan=>0});
 
 =head1 Name
 
