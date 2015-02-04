@@ -1,0 +1,10 @@
+#!/bin/sh
+#
+# A simple shell script to display all current 'at' tasks (upgrades)
+# sorted by planet name
+
+for i in `atq | cut -b48-52`
+do 
+	echo -n "$i "
+	at -c $i | grep "\./"
+done | sort -k 4
