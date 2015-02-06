@@ -1,0 +1,44 @@
+#!/usr/bin/env perl
+use 5.010; use strict; use warnings;
+$|=1;
+
+require 'l.pl';
+
+sub doit {
+    my $client = shift;
+    my $planet = shift;
+    my $pid = shift;
+    my $pname = $planet->{body}{name};
+
+    printf "%-10s %s %20s\n", $pname, $planet->{body}{orbit}, num($planet->{body}{happiness});
+}
+
+for_each_planet(\&doit);
+
+=head1 Name
+
+happy - Report happiness levels of all planets
+
+=head1 Usage
+
+./happy
+
+=head1 Description
+
+A very simple script to report the happiness levels of all your planets.
+Shows the amounts in thousands.
+
+=head1 Requirements
+
+Uses custom routines in l.pl, which should be found where this script was.
+
+=head1 See Also
+
+https://github.com/aaron-baugher/lacuna-scripts
+
+=head1 Author
+
+Aaron Baugher - aaron.baugher.biz
+
+=cut
+

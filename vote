@@ -1,0 +1,62 @@
+#!/usr/bin/env perl
+use 5.010; use strict; use warnings;
+$|=1;
+
+require 'l.pl';
+my $source = 'Billingate';  # the name of your space station
+
+sub doit {
+    my $client = shift;
+    my $planets = shift;
+    my $pid = shift;
+    my $buildings = shift;
+    my $bid = shift;
+    
+    my $bb = $client->building( id => $bid, type => 'Parliament' );
+
+    my $prop = $bb->view_propositions()->{propositions};
+    
+	for my $p (@$prop){
+		my $v = $bb->cast_vote($p->{id}, 1);
+		say "Voted yes on: ";
+		say $v->{proposition}{name};
+		say $v->{proposition}{description};
+		say '';	
+	}
+}
+
+one_planet_one_building(\&doit, $source, 'Parliament');
+
+=head1 Name
+
+vote - Vote yes on all pending Space Station propositions
+
+=head1 Usage
+
+./vote
+
+=head1 Description
+
+This script will automatically vote Yes on any propositions that are waiting
+on your vote.  I wrote it because it can be tedious to go through them
+one-by-one, especially in an alliance of 1 member where you're just trying to
+upgrade your Space Station buildings.  Be careful with it if you belong to an
+alliance with others who might make propositions you dislike.
+
+Put the name of your Space Station in $source in line 7.
+
+=head1 Requirements
+
+Uses custom routines in l.pl, which should be found where this script was.
+
+=head1 See Also
+
+https://github.com/aaron-baugher/lacuna-scripts
+
+=head1 Author
+
+Aaron Baugher - aaron.baugher.biz
+
+=cut
+
+

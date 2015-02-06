@@ -1,0 +1,60 @@
+#!/usr/bin/env perl
+use 5.010; use strict; use warnings;
+use Chart::Plot::Tagged;
+
+my $img = Chart::Plot::Tagged->new(3000,3000);
+my @coords;
+my @names;
+
+while(<DATA>){
+  chomp;
+  my($x, $y, $p, $z) = split ' ';
+  next unless $p;
+  push @coords, $x, $y;
+  push @names, "$p $z";
+}
+
+$img->setData(\@coords, 'black noline') or die $img->error();
+$img->setTag(\@names);
+print $img->draw();
+
+=head1 Name
+
+coords - Output a map of planets as a PNG image
+
+=head1 Usage
+
+./coords >map.png
+
+=head1 Description
+
+Prints a 3000x3000 PNG image to STDOUT, which can be redirected to the file of
+your choice.  Each planet is a named dot.  You can adjust the size of the image
+in line 5 if your planets are more spread out or closer together.
+
+Place your planet coordinates and names below the __DATA__ line at the bottom
+of the file, as shown.  Everything after the coordinates will be treated as
+the planet's name, so you can include the zone or anything else there.
+
+=head1 Requirements
+
+Chart::Plot::Tagged from CPAN
+
+Uses custom routines in l.pl, which should be found where this script was.
+
+=head1 See Also
+
+https://github.com/aaron-baugher/lacuna-scripts
+
+=head1 Author
+
+Aaron Baugher - aaron.baugher.biz
+
+=cut
+
+# Place planets on one line each below __DATA__, like this:
+# x-coordinate y-coordinate name
+__DATA__
+980 -1116 Absum (3,-4)
+1040 -1106 Altare (4,-4)
+-266 -506 Billingate (-1,-2)

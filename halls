@@ -1,0 +1,48 @@
+#!/usr/bin/env perl
+use 5.010; use strict; use warnings;
+use List::Util qw(first);
+$|=1;
+require 'l.pl';
+my %plans;
+
+sub doit {
+    my $client = shift;
+    my $planets = shift;
+    my $pid = shift;
+    my $buildings = shift;
+    my $bid = shift;
+
+    my $bb = $client->building( id => $bid, type => 'PlanetaryCommand' );
+    my $v = $bb->view_plans( id => $bid );
+    my $p = first { $_->{name} =~ /Hall/ } @{$v->{plans}};
+    printf "%-12s %3d\n", $planets->{$pid}, ($p->{quantity}||0);
+}
+
+for_each_planet_one_building(\&doit, 'Planetary Command Center');
+
+=head1 Name
+
+halls - Show the number of Halls of Vrbansk on each planet
+
+=head1 Usage
+
+./halls
+
+=head1 Description
+
+Reports the number of Hall of Vrbansk plans stored at each planet.
+
+=head1 Requirements
+
+Uses custom routines in l.pl, which should be found where this script was.
+
+=head1 See Also
+
+https://github.com/aaron-baugher/lacuna-scripts
+
+=head1 Author
+
+Aaron Baugher - aaron.baugher.biz
+
+=cut
+
